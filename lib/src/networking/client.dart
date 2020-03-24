@@ -26,15 +26,15 @@ class Auth0Client {
     return Auth0Client._(scheme, host, telemetry, authorization, baseUrl);
   }
 
-  Future<http.Response> mutate(String path, dynamic body) async {
+  Future<Response> mutate(String path, dynamic body) async {
     return this.request('POST', url(path), body: body);
   }
 
-  Future<http.Response> update(String path, dynamic body) async {
+  Future<Response> update(String path, dynamic body) async {
     return this.request('PATCH', url(path), body: body);
   }
 
-  Future<http.Response> query(String path, {dynamic params}) async {
+  Future<Response> query(String path, {dynamic params}) async {
     return this.request('GET', url(path, query: params));
   }
 
@@ -54,7 +54,7 @@ class Auth0Client {
         : parsed.toString();
   }
 
-  Future<http.Response> request(String method, String url,
+  Future<Response> request(String method, String url,
       {dynamic body, dynamic headers}) async {
     Map<String, String> headers = {
       'Accept': 'application/json',
@@ -64,17 +64,23 @@ class Auth0Client {
     if (bearer != null) {
       headers['Authorization'] = this.bearer;
     }
-    var _client = new http.Client();
-    Map<String, Future<http.Response>> handler = {
-      'POST': _client.post(url, body: Map.from((body ?? {}))),
-      'GET': _client.get(url, headers: headers),
-      'PATCH': _client.patch(url, body: Map.from((body ?? {}))),
-    };
-    http.Response uriResponse;
+    var _client = new Dio();
+    Future<Response> handler;
+    if (method == 'POST') {
+      handler = _client.post(url, data: Map.from((body ?? {})));
+    } else if (method == 'GET') {
+      handler = _client.get(url, options: Options(headers: headers));
+    } else if (method == 'PATCH') {
+      handler = _client.patch(url, data: Map.from((body ?? {})));
+    } else {
+      throw UnsupportedError('unsupported HTTP method');
+    }
+    Response uriResponse;
     try {
-      uriResponse = await handler[method];
+      uriResponse = await handler;
     } catch (e) {
       print(e);
+      rethrow;
     } finally {
       _client.close();
     }

@@ -12,15 +12,15 @@ class Users {
     return Users._(client);
   }
 
-  Future<Map> responseHandler(http.Response response) async {
+  Future<Map> responseHandler(Response response) async {
     if (response.statusCode == 200) {
-      dynamic value = jsonDecode(response.body);
+      dynamic value = jsonDecode(response.data);
       return Map.from(value);
     }
     else if (response.statusCode == 401) {
-      throw Auth0Exeption(description: response.body);
+      throw Auth0Exeption(description: response.data);
     }
-    throw jsonDecode(response.body);
+    throw jsonDecode(response.data);
   }
 
   ///Returns the user by identifier
@@ -32,7 +32,7 @@ class Users {
   Future<dynamic> getUser(dynamic parameters) async {
     assert(parameters['id'] != null);
     var payload = Map.from(parameters);
-    http.Response response =
+    Response response =
         await this.client.query('/api/v2/users/${payload['id']}');
     return await responseHandler(response);
   }
@@ -47,7 +47,7 @@ class Users {
   Future<dynamic> patchUser(dynamic parameters) async {
     assert(parameters['id'] != null && parameters['metadata'] != null);
     var payload = Map.from(parameters);
-    http.Response response =
+    Response response =
         await this.client.update('/api/v2/users/${payload['id']}', {
       'user_metadata': payload['metadata'],
     });
