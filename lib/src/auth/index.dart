@@ -265,6 +265,17 @@ class Auth0Auth {
     }
   }
 
+  Future<dynamic> getUser(String userId) async {
+    try {
+      final res = await this.client.query('/api/v2/users/$userId');
+      return await responseDataHandler(res);
+    } catch (e) {
+      print(e);
+      throw new Auth0Exeption(
+          name: e['name'], description: e['message'] ?? e['description']);
+    }
+  }
+
   Future<dynamic> updateUserMetadata(String userId, Map<String, dynamic> userMetadata) async {
     try {
       var payload = <String, dynamic>{'user_metadata': userMetadata};
