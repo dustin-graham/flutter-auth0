@@ -14,8 +14,8 @@ class Auth0Client {
         bearer = client.bearer ?? bearer,
         baseUrl = client.baseUrl;
 
-  Auth0Client._(
-      this.protocol, this.domain, this.telemetry, this.bearer, this.baseUrl);
+  Auth0Client._(this.protocol, this.domain, this.telemetry, this.bearer,
+      this.baseUrl);
 
   factory Auth0Client(String baseUrl, {dynamic telemetry, dynamic token}) {
     assert(baseUrl != null);
@@ -67,11 +67,13 @@ class Auth0Client {
     var _client = new Dio();
     Future<Response> handler;
     if (method == 'POST') {
-      handler = _client.post(url, data: Map.from((body ?? {})));
+      handler = _client.post(url, data: Map.from((body ?? {})),
+        options: Options(headers: headers,),);
     } else if (method == 'GET') {
-      handler = _client.get(url, options: Options(headers: headers));
+      handler = _client.get(url, options: Options(headers: headers,),);
     } else if (method == 'PATCH') {
-      handler = _client.patch(url, data: Map.from((body ?? {})));
+      handler = _client.patch(url, data: Map.from((body ?? {})),
+        options: Options(headers: headers,),);
     } else {
       throw UnsupportedError('unsupported HTTP method');
     }

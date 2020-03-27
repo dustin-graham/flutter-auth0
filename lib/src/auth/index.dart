@@ -264,4 +264,19 @@ class Auth0Auth {
           name: e['name'], description: e['message'] ?? e['description']);
     }
   }
+
+  Future<dynamic> updateUserMetadata(String userId, Map<String, dynamic> userMetadata) async {
+    try {
+      var payload = <String, dynamic>{'user_metadata': userMetadata};
+      Response res = await this.client.update(
+        '/api/v2/users/$userId',
+        payload,
+      );
+      return await responseDataHandler(res);
+    } catch (e, st) {
+      print('$e, $st');
+      throw new Auth0Exeption(
+          name: e['name'], description: e['message'] ?? e['description']);
+    }
+  }
 }
