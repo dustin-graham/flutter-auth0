@@ -132,11 +132,12 @@ class Auth0Auth {
     } catch (e) {
       print(e);
       if (e is DioError) {
-        final Map<String,dynamic> responseData = e.response.data;
+        final Map<String, dynamic> responseData = e.response.data;
         throw new Auth0Exeption(
             name: responseData['name'] ?? responseData['error'],
-            description:
-            responseData['message'] ?? responseData['description'] ?? responseData['error_description']);
+            description: responseData['message'] ??
+                responseData['description'] ??
+                responseData['error_description']);
       }
       rethrow;
     }
@@ -160,7 +161,8 @@ class Auth0Auth {
           'grant_type': 'refresh_token',
         });
       Response res = await this.client.mutate('/oauth/token', payload);
-      return await responseDataHandler(res);
+      final output = await responseDataHandler(res);
+      return output;
     } catch (e) {
       throw new Auth0Exeption(description: e);
     }
@@ -276,14 +278,24 @@ class Auth0Auth {
     }
   }
 
-  Future<dynamic> updateUserMetadata(String userId, Map<String, dynamic> userMetadata) async {
+  Future<dynamic> updateUserMetadata(
+      String userId, Map<String, dynamic> userMetadata) async {
     try {
       var payload = <String, dynamic>{'user_metadata': userMetadata};
       Response res = await this.client.update(
-        '/api/v2/users/$userId',
-        payload,
-      );
+            '/api/v2/users/$userId',
+            payload,
+          );
       return await responseDataHandler(res);
+    } on DioError catch (e) {
+      if (e.type == DioErrorType.RESPONSE) {
+        if (e.response.statusCode == 401) {
+          throw Auth0Exeption(
+            exceptionType: Auth0ExceptionType.unauthorized,
+          );
+        }
+      }
+      throw Auth0Exeption(exceptionType: Auth0ExceptionType.other);
     } catch (e, st) {
       print('$e, $st');
       throw new Auth0Exeption(
